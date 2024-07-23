@@ -1,0 +1,75 @@
+#!/users/allehe/python3/bin/python3.8 
+import re
+import sys
+import argparse
+#from myutils import chooseIntLoop
+
+
+def argumentParser() -> dict:
+    """
+        Purpose: Get command line arguments using argparse module
+        Parameter: None
+        Return: A dictionary containing all values from argparse module
+    """
+    ## Initialization
+    parser = argparse.ArgumentParser(
+        #prog='\n\t here comes prog',\
+        #usage='Usage part fall into here',\
+        description='Compare two txt files containing one item each line',\
+        epilog='epi log goes here')
+
+    ## Top level positonal arguments
+    parser.add_argument('SetA',help='First set to compare')
+    parser.add_argument('Operation',choices=['-','+','&','^'],help='What kind of operation on both Set')
+    parser.add_argument('SetB',help='Second set to compare')
+    
+    ## Top level optional arguments
+    parser.add_argument('-v','--verbose',action='count',default=0,help='verbose level like -v -vv -vvv')
+    parser.add_argument('-i','--interactive',action="store_true",help='run sudoers_tool interactively')
+    parser.add_argument('-if','--infile',help='sudoer files to read into application',default='/etc/sudoers')
+    parser.add_argument('-of','--outfile',help='new sudoer files to generate')
+    
+    #### Adding Sub Commandss 
+    #subp = parser.add_subparsers(help='this sub command help',description='my description',title='Sub Commands')
+    subp = parser.add_subparsers(title='Sub Commands',dest='subp')
+    
+    # sub command add
+    s_add = subp.add_parser('add', help='add new alias or approver group or just new member to existing alias and approver')
+    s_add_rule= subp.add_parser('add_rule', help=' add new rule')
+    s_add_default = subp.add_parser('add_default', help=' add new default')
+
+    s_add.add_argument('element',choices=['member','approver','host_alias','cmnd_alias','user_alias','runas_alias'],help="choose a element to add")
+    s_add.add_argument('alias_name',help="The actual name of alias or approver group")
+    s_add.add_argument('member',help="Member name of a alias or approver group")
+    
+    if len(sys.argv) < 2:
+        parser.parse_args(['-h'])
+        sys.exit(1)
+    else:
+        args = parser.parse_args()
+        return args
+
+
+if __name__ == "__main__":
+    # Get All command parameters
+    args = argumentParser()
+    if args.verbose >= 1:print(args)
+
+    try:
+        with open(args.SetA, 'r') as fa, \
+             open(args.SetB, 'r') as fb:
+             pass
+             seta = set( fa.readlines() )
+             setb = set( fb.readlines() )
+             output = set()
+             if args.Operation == '-': output = seta - setb
+             if args.Operation == '+': output = seta | setb
+             if args.Operation == '&': output = seta & setb
+             if args.Operation == '^': output = seta ^ setb
+             for i in output:print(i,end="")
+    except Exception as e:
+        print(e)
+
+    # Operations based on command arguments
+    if args.interactive:
+        pass
